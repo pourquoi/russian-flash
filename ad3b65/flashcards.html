@@ -393,6 +393,7 @@
       <option value="5">Урок 5 — У меня есть</option>
       <option value="7">Урок 7 — Работа и профессии</option>
       <option value="8">Урок 8 — Внешность</option>
+      <option value="9">Урок 9 — Погода</option>
     </select>
     <button class="ctrl" id="shuffleBtn">⇌ Shuffle</button>
     <button class="ctrl" id="restartBtn">↺ Restart</button>
@@ -632,9 +633,28 @@ const VOCAB = [
   {ru:"Кажется",en:"It seems / Apparently",l:8},
   {ru:"Студент / Студентка",en:"Student (m/f)",l:8},
   {ru:"Госпиталь",en:"Hospital",l:8},
+
+  // Урок 9 — Погода
+  {ru:"Погода",en:"Weather",l:9},
+  {ru:"Какая погода? / Как погода?",en:"What's the weather like?",l:9},
+  {ru:"Небо",en:"Sky",l:9},
+  {ru:"Ясно",en:"Clear",l:9},
+  {ru:"Солнечно",en:"Sunny",l:9},
+  {ru:"Облачно",en:"Cloudy",l:9},
+  {ru:"Пасмурно",en:"Overcast",l:9},
+  {ru:"Температура",en:"Temperature",l:9},
+  {ru:"Морозно",en:"Freezing",l:9},
+  {ru:"Холодно",en:"Cold",l:9},
+  {ru:"Прохладно",en:"Cool",l:9},
+  {ru:"Тепло",en:"Warm",l:9},
+  {ru:"Жарко",en:"Hot",l:9},
+  {ru:"Явления",en:"Phenomena",l:9},
+  {ru:"Дождь / Идёт дождь",en:"Rain / It's raining",l:9},
+  {ru:"Снег / Идёт снег",en:"Snow / It's snowing",l:9},
+  {ru:"Ветер",en:"Wind",l:9},
 ];
 
-const LESSON_NAMES = {1:"Урок 1",2:"Урок 2",3:"Урок 3",4:"Урок 4",5:"Урок 5",7:"Урок 7",8:"Урок 8"};
+const LESSON_NAMES = {1:"Урок 1",2:"Урок 2",3:"Урок 3",4:"Урок 4",5:"Урок 5",7:"Урок 7",8:"Урок 8",9:"Урок 9"};
 
 // State
 let deck = [], done = 0, total = 0, mode = 'en', inputMode = 'flip', flipped = false, current = null, typeChecked = false;

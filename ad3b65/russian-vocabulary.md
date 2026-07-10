@@ -241,3 +241,42 @@ Source: https://app.notion.com/p/Codename-3591aec3849980e9bdabc6f8592b9fc4
 | Кажется | It seems / Apparently |
 | Студент / Студентка | Student (m/f) |
 | Госпиталь | Hospital |
+
+## Урок 9: Погода (Weather)
+
+**Core:**
+
+| Russian | English |
+|---|---|
+| Погода | Weather |
+| Какая погода? / Как погода? | What's the weather like? |
+
+**Sky:**
+
+| Russian | English |
+|---|---|
+| Небо | Sky |
+| Ясно | Clear |
+| Солнечно | Sunny |
+| Облачно | Cloudy |
+| Пасмурно | Overcast |
+
+**Temperature:**
+
+| Russian | English |
+|---|---|
+| Температура | Temperature |
+| Морозно | Freezing |
+| Холодно | Cold |
+| Прохладно | Cool |
+| Тепло | Warm |
+| Жарко | Hot |
+
+**Phenomena:**
+
+| Russian | English |
+|---|---|
+| Явления | Phenomena |
+| Дождь / Идёт дождь | Rain / It's raining |
+| Снег / Идёт снег | Snow / It's snowing |
+| Ветер | Wind |
