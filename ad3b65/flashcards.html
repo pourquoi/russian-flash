@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Russian Flashcards</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a24;
+    --surface2: #24243a;
+    --accent: #7c6af7;
+    --accent2: #a78bfa;
+    --green: #34d399;
+    --red: #f87171;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --border: #2e2e4a;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+
+  .layout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 860px;
+    justify-content: center;
+  }
+
+  h1 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent2);
+    letter-spacing: .05em;
+    margin-bottom: 20px;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 540px;
+  }
+
+  select, button.ctrl {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  select:hover, button.ctrl:hover { border-color: var(--accent); background: var(--surface2); }
+  select { flex: 1; min-width: 160px; }
+
+  /* Progress */
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 540px;
+    margin-bottom: 28px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    transition: width .4s ease;
+  }
+  .progress-label { font-size: .8rem; color: var(--muted); white-space: nowrap; }
+
+  /* Card scene */
+  .scene {
+    width: 100%;
+    max-width: 540px;
+    height: 280px;
+    perspective: 1000px;
+    cursor: pointer;
+    margin-bottom: 28px;
+  }
+
+  .card {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform .45s cubic-bezier(.4,0,.2,1);
+  }
+  .card.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    border: 1px solid var(--border);
+    user-select: none;
+  }
+
+  .card-front {
+    background: var(--surface);
+  }
+  .card-back {
+    background: var(--surface2);
+    transform: rotateY(180deg);
+  }
+
+  .card-label {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .card-word {
+    font-size: clamp(1.4rem, 5vw, 2.2rem);
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .card-front .card-word { color: var(--accent2); }
+  .card-back .card-word { color: var(--text); }
+
+  .card-lesson {
+    position: absolute;
+    bottom: 16px;
+    font-size: .7rem;
+    color: var(--muted);
+  }
+
+  .card-hint {
+    margin-top: 20px;
+    font-size: .75rem;
+    color: var(--muted);
+  }
+
+  /* Action buttons */
+  .actions {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .btn {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    border: none;
+    font-size: 1.6rem;
+    cursor: pointer;
+    transition: transform .1s, box-shadow .1s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .btn:active { transform: scale(.92); }
+
+  .btn-no  { background: #3a1a1a; color: var(--red);   box-shadow: 0 0 0 2px #f8717133; }
+  .btn-yes { background: #0d2e22; color: var(--green); box-shadow: 0 0 0 2px #34d39933; }
+  .btn-no:hover  { background: #4a1e1e; }
+  .btn-yes:hover { background: #103826; }
+
+  .btn-skip {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    align-self: center;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color .15s;
+  }
+  .btn-skip:hover { border-color: var(--accent); color: var(--text); }
+
+  /* Mode toggle */
+  .mode-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .mode-btn {
+    padding: 6px 16px;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: .8rem;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .mode-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  /* Done screen */
+  .done {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+  .done.visible { display: flex; }
+  .done-emoji { font-size: 3rem; }
+  .done h2 { font-size: 1.4rem; }
+  .done p { color: var(--muted); font-size: .9rem; }
+  .done button {
+    margin-top: 8px;
+    padding: 12px 28px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .done button:hover { background: var(--accent2); }
+
+  .main { flex: 0 0 540px; min-width: 0; display: flex; flex-direction: column; align-items: center; }
+
+  /* Sidebar */
+  .sidebar {
+    flex: 0 0 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: sticky;
+    top: 24px;
+    max-height: calc(100vh - 48px);
+  }
+
+  .slist {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 80px;
+    max-height: calc(50vh - 32px);
+  }
+
+  .slist-header {
+    padding: 10px 14px;
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .slist-header.correct { color: var(--green); }
+  .slist-header.wrong   { color: var(--red); }
+
+  .slist-count {
+    font-size: .8rem;
+    font-weight: 700;
+    opacity: .8;
+  }
+
+  .slist-items {
+    overflow-y: auto;
+    flex: 1;
+    padding: 6px 0;
+  }
+
+  .slist-item {
+    padding: 6px 14px;
+    font-size: .78rem;
+    line-height: 1.4;
+    border-bottom: 1px solid var(--border);
+    animation: fadeIn .2s ease;
+  }
+  .slist-item:last-child { border-bottom: none; }
+  .slist-item .word-ru { color: var(--accent2); font-weight: 600; }
+  .slist-item .word-en { color: var(--muted); font-size: .72rem; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+  @media (max-width: 700px) {
+    .layout { flex-direction: column; align-items: center; }
+    .sidebar { flex-direction: row; position: static; flex: none; width: 100%; max-width: 540px; max-height: none; }
+    .slist { flex: 1; max-height: 160px; }
+  }
+
+  /* Type mode */
+  .type-area {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 540px;
+    margin-bottom: 20px;
+  }
+  .type-area.visible { display: flex; }
+
+  .type-input-row {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+  }
+
+  #typeInput {
+    flex: 1;
+    background: var(--surface);
+    color: var(--text);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 1.1rem;
+    outline: none;
+    transition: border-color .2s;
+    font-family: inherit;
+  }
+  #typeInput:focus { border-color: var(--accent); }
+  #typeInput.correct { border-color: var(--green); background: #0d2e22; }
+  #typeInput.wrong   { border-color: var(--red);   background: #3a1a1a; }
+
+  #typeSubmit {
+    padding: 0 20px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s;
+  }
+  #typeSubmit:hover { background: var(--accent2); }
+
+  .type-feedback {
+    font-size: .9rem;
+    min-height: 1.4em;
+    text-align: center;
+  }
+  .type-feedback.correct { color: var(--green); }
+  .type-feedback.wrong   { color: var(--red); }
+</style>
+</head>
+<body>
+
+<h1>Russian Flashcards</h1>
+
+<div class="layout">
+<div class="main" id="main">
+  <!-- Controls -->
+  <div class="controls">
+    <select id="lessonFilter">
+      <option value="all">All lessons</option>
+      <option value="1">Урок 1 — Приветствия</option>
+      <option value="2">Урок 2 — Вежливые выражения</option>
+      <option value="3">Урок 3 — Возраст</option>
+      <option value="4">Урок 4 — Семья</option>
+      <option value="5">Урок 5 — У меня есть</option>
+      <option value="7">Урок 7 — Работа и профессии</option>
+      <option value="8">Урок 8 — Внешность</option>
+    </select>
+    <button class="ctrl" id="shuffleBtn">⇌ Shuffle</button>
+    <button class="ctrl" id="restartBtn">↺ Restart</button>
+  </div>
+
+  <!-- Direction -->
+  <div class="mode-row">
+    <button class="mode-btn" data-mode="ru">RU → EN</button>
+    <button class="mode-btn active" data-mode="en">EN → RU</button>
+    <button class="mode-btn" data-mode="random">Random</button>
+  </div>
+  <!-- Input method -->
+  <div class="mode-row">
+    <button class="mode-btn active" data-input="flip">Flip</button>
+    <button class="mode-btn" data-input="type">⌨ Type</button>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-row">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="progress-label" id="progressLabel">0 / 0</span>
+  </div>
+
+  <!-- Card -->
+  <div class="scene" id="scene">
+    <div class="card" id="card">
+      <div class="card-face card-front">
+        <div class="card-label" id="frontLabel">Russian</div>
+        <div class="card-word" id="frontWord"></div>
+        <div class="card-hint">tap to reveal</div>
+        <div class="card-lesson" id="cardLesson"></div>
+      </div>
+      <div class="card-face card-back">
+        <div class="card-label" id="backLabel">English</div>
+        <div class="card-word" id="backWord"></div>
+        <div class="card-lesson" id="cardLesson2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Type input (type mode only) -->
+  <div class="type-area" id="typeArea">
+    <div class="type-input-row">
+      <input type="text" id="typeInput" placeholder="Type your answer…" autocomplete="off" autocorrect="off" spellcheck="false" />
+      <button id="typeSubmit">Check</button>
+    </div>
+    <div class="type-feedback" id="typeFeedback"></div>
+  </div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <button class="btn btn-no"  id="btnNo"  title="Again">✗</button>
+    <button class="btn-skip"    id="btnSkip" title="Skip">→</button>
+    <button class="btn btn-yes" id="btnYes" title="Got it">✓</button>
+  </div>
+
+  <!-- Done -->
+  <div class="done" id="doneScreen">
+    <div class="done-emoji">🎉</div>
+    <h2>Deck complete!</h2>
+    <p id="doneStats"></p>
+    <button id="doneRestart">Play again</button>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="slist">
+    <div class="slist-header correct">✓ Got it <span class="slist-count" id="countCorrect">0</span></div>
+    <div class="slist-items" id="listCorrect"></div>
+  </div>
+  <div class="slist">
+    <div class="slist-header wrong">✗ Again <span class="slist-count" id="countWrong">0</span></div>
+    <div class="slist-items" id="listWrong"></div>
+  </div>
+</div>
+
+</div><!-- .layout -->
+
+<script>
+const VOCAB = [
+  // Урок 1 — Приветствия
+  {ru:"Привет!",en:"Hi!",l:1},
+  {ru:"Здравствуйте!",en:"Hello! (formal)",l:1},
+  {ru:"Как дела?",en:"How are you?",l:1},
+  {ru:"Хорошо!",en:"Good!",l:1},
+  {ru:"Отлично!",en:"Excellent!",l:1},
+  {ru:"Нормально",en:"OK / Normal",l:1},
+  {ru:"Так себе",en:"So-so",l:1},
+  {ru:"Плохо",en:"Bad",l:1},
+  {ru:"Как тебя зовут?",en:"What's your name? (informal)",l:1},
+  {ru:"Как вас зовут?",en:"What's your name? (formal)",l:1},
+  {ru:"Меня зовут ...",en:"My name is ...",l:1},
+  {ru:"Приятно познакомиться!",en:"Nice to meet you!",l:1},
+  {ru:"Откуда ты?",en:"Where are you from? (informal)",l:1},
+  {ru:"Откуда вы?",en:"Where are you from? (formal)",l:1},
+  {ru:"Я из Франции",en:"I'm from France",l:1},
+  {ru:"Кто? / Что?",en:"Who? / What?",l:1},
+  {ru:"Это",en:"This is",l:1},
+  {ru:"Еда",en:"Food",l:1},
+  {ru:"Книга",en:"Book",l:1},
+  {ru:"Учитель / Учительница",en:"Teacher (m/f)",l:1},
+
+  // Урок 2 — Вежливые выражения
+  {ru:"Доброе утро!",en:"Good morning!",l:2},
+  {ru:"Добрый день!",en:"Good afternoon!",l:2},
+  {ru:"Добрый вечер!",en:"Good evening!",l:2},
+  {ru:"Спасибо",en:"Thank you",l:2},
+  {ru:"Пожалуйста",en:"Please / You're welcome",l:2},
+  {ru:"Извините",en:"Excuse me / Sorry",l:2},
+  {ru:"Конечно",en:"Of course",l:2},
+  {ru:"Очень приятно!",en:"Nice to meet you!",l:2},
+  {ru:"Мне тоже приятно!",en:"Pleased to meet you too!",l:2},
+  {ru:"До свидания!",en:"Goodbye! (formal)",l:2},
+  {ru:"Пока!",en:"Bye! (informal)",l:2},
+  {ru:"Увидимся!",en:"See you!",l:2},
+  {ru:"Всего хорошего!",en:"All the best!",l:2},
+  {ru:"Хорошего дня!",en:"Have a good day!",l:2},
+  {ru:"Вам тоже!",en:"You too!",l:2},
+  {ru:"Удачи!",en:"Good luck!",l:2},
+  {ru:"Ничего",en:"Nothing",l:2},
+  {ru:"Что нового?",en:"What's new?",l:2},
+
+  // Урок 3 — Возраст
+  {ru:"Мальчик / Девочка",en:"Boy / Girl (0–12)",l:3},
+  {ru:"Подросток / Юноша",en:"Teenager / Young man (12–18)",l:3},
+  {ru:"Парень / Девушка",en:"Young man / Young woman (18–30)",l:3},
+  {ru:"Мужчина / Женщина",en:"Man / Woman (30+)",l:3},
+  {ru:"Сколько тебе лет?",en:"How old are you? (informal)",l:3},
+  {ru:"Сколько вам лет?",en:"How old are you? (formal)",l:3},
+  {ru:"Мне ... лет",en:"I am ... years old",l:3},
+  {ru:"Где вы живёте?",en:"Where do you live?",l:3},
+  {ru:"Я живу в Париже",en:"I live in Paris",l:3},
+  {ru:"Один",en:"1",l:3},{ru:"Два",en:"2",l:3},{ru:"Три",en:"3",l:3},
+  {ru:"Четыре",en:"4",l:3},{ru:"Пять",en:"5",l:3},{ru:"Шесть",en:"6",l:3},
+  {ru:"Семь",en:"7",l:3},{ru:"Восемь",en:"8",l:3},{ru:"Девять",en:"9",l:3},
+  {ru:"Десять",en:"10",l:3},{ru:"Двадцать",en:"20",l:3},
+  {ru:"Тридцать",en:"30",l:3},{ru:"Сорок",en:"40",l:3},
+  {ru:"Пятьдесят",en:"50",l:3},{ru:"Шестьдесят",en:"60",l:3},
+  {ru:"Семьдесят",en:"70",l:3},{ru:"Восемьдесят",en:"80",l:3},
+  {ru:"Девяносто",en:"90",l:3},{ru:"Сто",en:"100",l:3},
+
+  // Урок 4 — Семья
+  {ru:"Семья",en:"Family",l:4},
+  {ru:"Родители",en:"Parents",l:4},
+  {ru:"Супруги",en:"Spouses",l:4},
+  {ru:"Муж / Жена",en:"Husband / Wife",l:4},
+  {ru:"Сын / Дочь",en:"Son / Daughter",l:4},
+  {ru:"Внук / Внучка",en:"Grandson / Granddaughter",l:4},
+  {ru:"Сестра-близнец",en:"Twin sister",l:4},
+  {ru:"Старший / Старшая",en:"Older (m/f)",l:4},
+  {ru:"Младший / Младшая",en:"Younger (m/f)",l:4},
+  {ru:"Родной / Родная",en:"Biological/own (m/f)",l:4},
+  {ru:"Двоюродный брат / сестра",en:"Cousin (m/f)",l:4},
+  {ru:"Дядя / Тётя",en:"Uncle / Aunt",l:4},
+
+  // Урок 5 — У меня есть
+  {ru:"У меня есть",en:"I have",l:5},
+  {ru:"У него есть",en:"He has",l:5},
+  {ru:"У неё есть",en:"She has",l:5},
+  {ru:"У них есть",en:"They have",l:5},
+  {ru:"Дом / Дома",en:"House / Houses",l:5},
+  {ru:"Квартира",en:"Apartment",l:5},
+  {ru:"Комната / Зал",en:"Room / Hall",l:5},
+  {ru:"Работа",en:"Work",l:5},
+  {ru:"Телефон",en:"Phone",l:5},
+  {ru:"Ноутбук",en:"Laptop",l:5},
+  {ru:"Компьютер",en:"Computer",l:5},
+  {ru:"Ручка",en:"Pen",l:5},
+  {ru:"Одежда",en:"Clothes",l:5},
+  {ru:"Продукты",en:"Groceries",l:5},
+  {ru:"Документы",en:"Documents",l:5},
+  {ru:"Паспорт",en:"Passport",l:5},
+  {ru:"Деньги",en:"Money",l:5},
+  {ru:"Кошка / Кошки",en:"Cat / Cats",l:5},
+  {ru:"Собака / Собаки",en:"Dog / Dogs",l:5},
+  {ru:"Машина",en:"Car",l:5},
+  {ru:"Медведь",en:"Bear",l:5},
+  {ru:"Птица",en:"Bird",l:5},
+  {ru:"Рыба",en:"Fish",l:5},
+  {ru:"Курица",en:"Chicken",l:5},
+
+  // Урок 7 — Работа и профессии
+  {ru:"Программист / Разработчик",en:"Programmer / Developer",l:7},
+  {ru:"Учитель / Учительница",en:"Teacher (m/f)",l:7},
+  {ru:"Рабочий / Строитель",en:"Worker / Builder",l:7},
+  {ru:"Юрист",en:"Lawyer",l:7},
+  {ru:"Повар",en:"Cook / Chef",l:7},
+  {ru:"Стюардесса / Стюард",en:"Stewardess / Steward",l:7},
+  {ru:"Официант",en:"Waiter",l:7},
+  {ru:"Полицейский",en:"Police officer",l:7},
+  {ru:"Медсестра",en:"Nurse",l:7},
+  {ru:"Врач",en:"Doctor",l:7},
+  {ru:"Менеджер по маркетингу",en:"Marketing manager",l:7},
+  {ru:"Инженер",en:"Engineer",l:7},
+  {ru:"Что вы учите?",en:"What are you studying?",l:7},
+  {ru:"Я учу русский язык",en:"I'm learning Russian",l:7},
+  {ru:"Кем вы работаете?",en:"What do you work as?",l:7},
+  {ru:"Я работаю программистом",en:"I work as a programmer",l:7},
+
+  // Урок 8 — Внешность: Colors
+  {ru:"Белый",en:"White",l:8},
+  {ru:"Чёрный",en:"Black",l:8},
+  {ru:"Серый",en:"Grey",l:8},
+  {ru:"Красный",en:"Red",l:8},
+  {ru:"Зелёный",en:"Green",l:8},
+  {ru:"Синий",en:"Blue (dark)",l:8},
+  {ru:"Голубой",en:"Blue (light/sky)",l:8},
+  {ru:"Фиолетовый",en:"Purple",l:8},
+  {ru:"Оранжевый",en:"Orange",l:8},
+  {ru:"Жёлтый",en:"Yellow",l:8},
+  {ru:"Коричневый",en:"Brown",l:8},
+  {ru:"Розовый",en:"Pink",l:8},
+  // Урок 8 — Adjectives & appearance
+  {ru:"Молодой / Молодая",en:"Young (m/f)",l:8},
+  {ru:"Красивый / Красивая",en:"Handsome / Beautiful",l:8},
+  {ru:"Серьёзный / Серьёзная",en:"Serious (m/f)",l:8},
+  {ru:"Смешной / Смешная",en:"Funny (m/f)",l:8},
+  {ru:"Спортивный",en:"Sporty",l:8},
+  {ru:"Большой / Маленький",en:"Big / Small",l:8},
+  {ru:"Необычный / Необычная",en:"Unusual (m/f)",l:8},
+  {ru:"Волосы",en:"Hair",l:8},
+  {ru:"Глаза",en:"Eyes",l:8},
+  {ru:"Рост",en:"Height",l:8},
+  {ru:"Высокий",en:"Tall",l:8},
+  {ru:"Средний (рост)",en:"Medium / Average height",l:8},
+  {ru:"Невысокий / Низкий",en:"Short (people / things)",l:8},
+  // Eye colors
+  {ru:"Карие",en:"Brown (eyes)",l:8},
+  {ru:"Голубые глаза",en:"Light blue eyes",l:8},
+  {ru:"Серые глаза",en:"Grey eyes",l:8},
+  // Hair types
+  {ru:"Брюнет / Брюнетка",en:"Dark-haired (m/f)",l:8},
+  {ru:"Блондин / Блондинка",en:"Blond (m/f)",l:8},
+  {ru:"Шатен / Шатенка",en:"Brown-haired (m/f)",l:8},
+  // Other
+  {ru:"Кажется",en:"It seems / Apparently",l:8},
+  {ru:"Студент / Студентка",en:"Student (m/f)",l:8},
+  {ru:"Госпиталь",en:"Hospital",l:8},
+];
+
+const LESSON_NAMES = {1:"Урок 1",2:"Урок 2",3:"Урок 3",4:"Урок 4",5:"Урок 5",7:"Урок 7",8:"Урок 8"};
+
+// State
+let deck = [], done = 0, total = 0, mode = 'en', inputMode = 'flip', flipped = false, current = null, typeChecked = false;
+
+const typeArea     = document.getElementById('typeArea');
+const typeInput    = document.getElementById('typeInput');
+const typeSubmit   = document.getElementById('typeSubmit');
+const typeFeedback = document.getElementById('typeFeedback');
+
+function normalize(s) {
+  // lowercase, strip combining accents (stress marks), trim punctuation
+  return s.toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[!?.…,]/g, '').trim();
+}
+
+function checkType() {
+  if (typeChecked) { answer(typeInput.classList.contains('correct')); return; }
+  typeChecked = true;
+
+  const guess  = normalize(typeInput.value);
+  const answer = normalize(current._cardMode === 'ru' ? current.en : current.ru);
+
+  // Accept if fully contained or contains (handles partial matches like "m/f" variants)
+  const correct = guess === answer
+    || answer.includes(guess) && guess.length > 2
+    || guess.includes(answer) && answer.length > 2;
+
+  if (correct) {
+    typeInput.classList.add('correct');
+    typeFeedback.textContent = '✓ Correct!';
+    typeFeedback.className = 'type-feedback correct';
+  } else {
+    typeInput.classList.add('wrong');
+    typeFeedback.textContent = `✗  ${current._cardMode === 'ru' ? current.en : current.ru}`;
+    typeFeedback.className = 'type-feedback wrong';
+  }
+
+  // Flip card to show answer
+  flipped = true;
+  card.classList.add('flipped');
+  typeSubmit.textContent = correct ? '✓ Next' : '✗ Next';
+}
+
+const card       = document.getElementById('card');
+const frontWord  = document.getElementById('frontWord');
+const backWord   = document.getElementById('backWord');
+const frontLabel = document.getElementById('frontLabel');
+const backLabel  = document.getElementById('backLabel');
+const cardLesson = document.getElementById('cardLesson');
+const cardLesson2= document.getElementById('cardLesson2');
+const progressFill  = document.getElementById('progressFill');
+const progressLabel = document.getElementById('progressLabel');
+const doneScreen = document.getElementById('doneScreen');
+const doneStats  = document.getElementById('doneStats');
+const scene      = document.getElementById('scene');
+const listCorrect  = document.getElementById('listCorrect');
+const listWrong    = document.getElementById('listWrong');
+const countCorrect = document.getElementById('countCorrect');
+const countWrong   = document.getElementById('countWrong');
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function addSidebarEntry(list, countEl, item) {
+  const el = document.createElement('div');
+  el.className = 'slist-item';
+  el.innerHTML = `<div class="word-ru">${item.ru}</div><div class="word-en">${item.en}</div>`;
+  list.prepend(el);
+  countEl.textContent = list.children.length;
+}
+
+function clearSidebar() {
+  listCorrect.innerHTML = '';
+  listWrong.innerHTML   = '';
+  countCorrect.textContent = '0';
+  countWrong.textContent   = '0';
+}
+
+function buildDeck() {
+  const filter = document.getElementById('lessonFilter').value;
+  const source = filter === 'all' ? VOCAB : VOCAB.filter(v => v.l == filter);
+  deck = shuffle([...source]);
+  done = 0; total = deck.length;
+  doneScreen.classList.remove('visible');
+  scene.style.display = '';
+  document.querySelector('.actions').style.display = '';
+  const isType = inputMode === 'type';
+  typeArea.classList.toggle('visible', isType);
+  scene.style.cursor = isType ? 'default' : 'pointer';
+  clearSidebar();
+  showNext();
+}
+
+function showNext() {
+  if (deck.length === 0) { showDone(); return; }
+
+  current = deck[deck.length - 1];
+  const cardMode = mode === 'random' ? (Math.random() < .5 ? 'ru' : 'en') : mode;
+  current._cardMode = cardMode;
+
+  const wasFlipped = flipped;
+  flipped = false;
+  card.classList.remove('flipped');
+
+  const applyContent = () => {
+    if (cardMode === 'ru') {
+      frontLabel.textContent = 'Russian';
+      backLabel.textContent  = 'English';
+      frontWord.textContent  = current.ru;
+      backWord.textContent   = current.en;
+    } else {
+      frontLabel.textContent = 'English';
+      backLabel.textContent  = 'Russian';
+      frontWord.textContent  = current.en;
+      backWord.textContent   = current.ru;
+    }
+    const ln = LESSON_NAMES[current.l] || '';
+    cardLesson.textContent  = ln;
+    cardLesson2.textContent = ln;
+  };
+
+  // Wait for flip-back animation before revealing new content
+  if (wasFlipped) setTimeout(applyContent, 450);
+  else applyContent();
+
+  // Reset type mode UI
+  if (inputMode === 'type') {
+    const reset = () => {
+      typeInput.value = '';
+      typeInput.className = '';
+      typeFeedback.textContent = '';
+      typeFeedback.className = 'type-feedback';
+      typeSubmit.textContent = 'Check';
+      typeChecked = false;
+      typeInput.focus();
+    };
+    if (wasFlipped) setTimeout(reset, 450);
+    else reset();
+  }
+
+  updateProgress();
+}
+
+function flipCard() {
+  flipped = !flipped;
+  card.classList.toggle('flipped', flipped);
+}
+
+function answer(known) {
+  if (inputMode === 'type' && !typeChecked) return; // must check first
+  if (!flipped) { flipCard(); return; } // force reveal first
+  deck.pop();
+  if (!known) {
+    deck.unshift(current);
+    addSidebarEntry(listWrong, countWrong, current);
+  } else {
+    done++;
+    addSidebarEntry(listCorrect, countCorrect, current);
+  }
+  setTimeout(showNext, 200);
+}
+
+function updateProgress() {
+  const pct = total ? (done / total * 100) : 0;
+  progressFill.style.width = pct + '%';
+  progressLabel.textContent = `${done} / ${total}`;
+}
+
+function showDone() {
+  scene.style.display = 'none';
+  document.querySelector('.actions').style.display = 'none';
+  typeArea.classList.remove('visible');
+  doneStats.textContent = `You knew ${done} out of ${total} cards.`;
+  doneScreen.classList.add('visible');
+}
+
+// Type mode events
+typeSubmit.addEventListener('click', checkType);
+typeInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); checkType(); }
+});
+
+// Events
+scene.addEventListener('click', () => { if (deck.length && inputMode !== 'type') flipCard(); });
+document.getElementById('btnNo').addEventListener('click',  () => answer(false));
+document.getElementById('btnYes').addEventListener('click', () => answer(true));
+document.getElementById('btnSkip').addEventListener('click', () => {
+  if (!deck.length) return;
+  deck.pop();
+  deck.unshift(current);
+  showNext();
+});
+document.getElementById('shuffleBtn').addEventListener('click', () => {
+  shuffle(deck);
+  if (deck.length) showNext();
+});
+document.getElementById('restartBtn').addEventListener('click', buildDeck);
+document.getElementById('doneRestart').addEventListener('click', buildDeck);
+document.getElementById('lessonFilter').addEventListener('change', buildDeck);
+
+document.querySelectorAll('[data-mode]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-mode]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    mode = btn.dataset.mode;
+    buildDeck();
+  });
+});
+
+document.querySelectorAll('[data-input]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-input]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    inputMode = btn.dataset.input;
+    buildDeck();
+  });
+});
+
+// Keyboard — disabled when focus is in type input
+document.addEventListener('keydown', e => {
+  if (inputMode === 'type') return;
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
+  if (e.key === 'ArrowRight' || e.key === 'l') answer(true);
+  if (e.key === 'ArrowLeft'  || e.key === 'h') answer(false);
+  if (e.key === 'ArrowDown'  || e.key === 'j') {
+    if (!deck.length) return;
+    deck.pop(); deck.unshift(current); showNext();
+  }
+});
+
+buildDeck();
+</script>
+</body>
+</html>
