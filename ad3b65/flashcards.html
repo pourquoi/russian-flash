@@ -603,6 +603,7 @@
   <div class="actions">
     <button class="btn btn-no"  id="btnNo"  title="Again">✗</button>
     <button class="btn-skip"    id="btnSkip" title="Skip">→</button>
+    <button class="btn-skip"    id="btnSpeak" title="Pronounce">🔊</button>
     <button class="btn btn-yes" id="btnYes" title="Got it">✓</button>
   </div>
 
@@ -1048,6 +1049,14 @@ document.getElementById('btnSkip').addEventListener('click', () => {
   deck.unshift(current);
   showNext();
 });
+document.getElementById('btnSpeak').addEventListener('click', () => {
+  if (!current || !('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(current.ru);
+  u.lang = 'ru-RU';
+  speechSynthesis.speak(u);
+});
+if (!('speechSynthesis' in window)) document.getElementById('btnSpeak').style.display = 'none';
 document.getElementById('restartBtn').addEventListener('click', buildDeck);
 document.getElementById('doneRestart').addEventListener('click', buildDeck);
 document.getElementById('lessonFilter').addEventListener('change', buildDeck);
