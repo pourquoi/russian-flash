@@ -132,6 +132,7 @@
     padding: 24px 16px;
     position: relative;
     transition: background .3s ease, color .3s ease;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body::after {
@@ -293,6 +294,26 @@
     font-size: .7rem;
     color: var(--muted);
   }
+
+  .card-speak {
+    display: none;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 1rem;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: border-color .15s, box-shadow .15s, color .15s;
+  }
+  .card-speak.visible { display: flex; }
+  .card-speak:hover { border-color: var(--accent); color: var(--text); box-shadow: var(--glow-1); }
+  .card-speak:focus:not(:focus-visible) { outline: none; }
 
   .card-hint {
     margin-top: 20px;
@@ -568,12 +589,14 @@
   <div class="scene" id="scene">
     <div class="card" id="card">
       <div class="card-face card-front">
+        <button class="card-speak" id="speakFront" title="Pronounce">🔊</button>
         <div class="card-label" id="frontLabel">Russian</div>
         <div class="card-word" id="frontWord"></div>
         <div class="card-hint">tap to reveal</div>
         <div class="card-lesson" id="cardLesson"></div>
       </div>
       <div class="card-face card-back">
+        <button class="card-speak" id="speakBack" title="Pronounce">🔊</button>
         <div class="card-label" id="backLabel">English</div>
         <div class="card-word" id="backWord"></div>
         <div class="card-lesson" id="cardLesson2"></div>
@@ -594,7 +617,6 @@
   <div class="actions">
     <button class="btn btn-no"  id="btnNo"  title="Again">✗</button>
     <button class="btn-skip"    id="btnSkip" title="Skip">→</button>
-    <button class="btn-skip"    id="btnSpeak" title="Pronounce">🔊</button>
     <button class="btn btn-yes" id="btnYes" title="Got it">✓</button>
   </div>
 
@@ -678,6 +700,9 @@ const frontLabel = document.getElementById('frontLabel');
 const backLabel  = document.getElementById('backLabel');
 const cardLesson = document.getElementById('cardLesson');
 const cardLesson2= document.getElementById('cardLesson2');
+const speakFront = document.getElementById('speakFront');
+const speakBack  = document.getElementById('speakBack');
+const speechSupported = 'speechSynthesis' in window;
 const progressFill  = document.getElementById('progressFill');
 const progressLabel = document.getElementById('progressLabel');
 const doneScreen = document.getElementById('doneScreen');
@@ -778,6 +803,9 @@ function showNext() {
     const ln = LESSON_NAMES[current.l] || '';
     cardLesson.textContent  = ln;
     cardLesson2.textContent = ln;
+
+    speakFront.classList.toggle('visible', speechSupported && cardMode === 'ru');
+    speakBack.classList.toggle('visible', speechSupported && cardMode === 'en');
   };
 
   // Wait for flip-back animation before revealing new content
@@ -878,14 +906,16 @@ document.getElementById('btnSkip').addEventListener('click', () => {
   deck.unshift(current);
   showNext();
 });
-document.getElementById('btnSpeak').addEventListener('click', () => {
-  if (!current || !('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(current.ru);
-  u.lang = 'ru-RU';
-  speechSynthesis.speak(u);
+[speakFront, speakBack].forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation(); // don't let it also trigger the card flip
+    if (!current || !speechSupported) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(current.ru);
+    u.lang = 'ru-RU';
+    speechSynthesis.speak(u);
+  });
 });
-if (!('speechSynthesis' in window)) document.getElementById('btnSpeak').style.display = 'none';
 document.getElementById('restartBtn').addEventListener('click', buildDeck);
 document.getElementById('doneRestart').addEventListener('click', buildDeck);
 document.getElementById('lessonFilter').addEventListener('change', buildDeck);
