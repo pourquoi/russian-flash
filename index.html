@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Russian Flashcards</title>
-<script>document.documentElement.dataset.theme = localStorage.getItem('rf-theme') || 'cyberpunk';</script>
+<script>document.documentElement.dataset.theme = localStorage.getItem('rf-theme') || 'retro';</script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&family=Audiowide&family=VT323&display=swap');
 
@@ -91,6 +91,13 @@
     transition: background .3s ease, color .3s ease;
   }
 
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+
   h1 {
     font-family: var(--font-display);
     font-size: 1.3rem;
@@ -99,33 +106,21 @@
     text-shadow: var(--glow-1);
     letter-spacing: .18em;
     text-transform: uppercase;
-    margin-bottom: 1.5rem;
   }
 
-  #themeSelect {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    z-index: 10;
-    background: var(--surface);
-    color: var(--text);
+  #themeToggle {
+    width: 40px; height: 40px;
+    flex: 0 0 auto;
+    border-radius: 50%;
     border: 1px solid var(--border);
-    border-radius: 2px;
-    padding: 8px 14px;
-    font-size: .8rem;
-    font-family: inherit;
-    text-transform: uppercase;
-    letter-spacing: .04em;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 1.1rem;
     cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
     transition: border-color .15s, box-shadow .15s;
   }
-  #themeSelect:hover { border-color: var(--accent); box-shadow: var(--glow-1); }
-
-  @media (max-width: 700px) {
-    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-    h1 { margin-bottom: 0; }
-    #themeSelect { position: static; top: auto; right: auto; z-index: auto; min-width: 0; }
-  }
+  #themeToggle:hover { border-color: var(--accent); box-shadow: var(--glow-1); }
 
   ul { list-style: none; padding: 0; }
   li { margin: 0.6rem 0; }
@@ -152,39 +147,30 @@
 <body>
 <div class="topbar">
   <h1>Russian Flashcards</h1>
-  <select id="themeSelect">
-    <option value="cyberpunk">🌆 Cyberpunk</option>
-    <option value="retro">🌴 Retro 80s</option>
-    <option value="classic">🟣 Classic</option>
-    <option value="terminal">💻 Terminal</option>
-  </select>
+  <button id="themeToggle" title="Cycle theme"></button>
 </div>
 <ul id="list"></ul>
 <script>
-const themeSelect = document.getElementById('themeSelect');
-themeSelect.value = document.documentElement.dataset.theme;
-themeSelect.addEventListener('change', () => {
-  localStorage.setItem('rf-theme', themeSelect.value);
-  document.documentElement.dataset.theme = themeSelect.value;
-});
-
-// Icon-only labels on mobile (no room for text next to the title), full labels on desktop
-const THEME_LABELS = {
-  cyberpunk: ['🌆', '🌆 Cyberpunk'],
-  retro: ['🌴', '🌴 Retro 80s'],
-  classic: ['🟣', '🟣 Classic'],
-  terminal: ['💻', '💻 Terminal'],
+const THEMES = ['cyberpunk', 'retro', 'classic', 'terminal'];
+const THEME_META = {
+  cyberpunk: { icon: '🌆', name: 'Cyberpunk' },
+  retro:     { icon: '🌴', name: 'Retro 80s' },
+  classic:   { icon: '🟣', name: 'Classic' },
+  terminal:  { icon: '💻', name: 'Terminal' },
 };
-const mobileThemeQuery = window.matchMedia('(max-width: 700px)');
-function updateThemeLabels() {
-  const isMobile = mobileThemeQuery.matches;
-  for (const opt of themeSelect.options) {
-    const pair = THEME_LABELS[opt.value];
-    if (pair) opt.textContent = isMobile ? pair[0] : pair[1];
-  }
+const themeToggle = document.getElementById('themeToggle');
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  const meta = THEME_META[t];
+  themeToggle.textContent = meta.icon;
+  themeToggle.title = `Theme: ${meta.name} (click to change)`;
 }
-updateThemeLabels();
-mobileThemeQuery.addEventListener('change', updateThemeLabels);
+applyTheme(document.documentElement.dataset.theme);
+themeToggle.addEventListener('click', () => {
+  const next = THEMES[(THEMES.indexOf(document.documentElement.dataset.theme) + 1) % THEMES.length];
+  localStorage.setItem('rf-theme', next);
+  applyTheme(next);
+});
 
 fetch('students.json')
   .then(r => r.json())

@@ -37,7 +37,7 @@ Never hardcode a student's Notion URL in the skill — it always comes from `stu
 
 ## Theming
 
-`index.html` and every `<id>/flashcards.html` support 4 themes (Cyberpunk, Retro 80s, Classic, Terminal), all driven by CSS custom properties scoped under `:root[data-theme="..."]`. The choice is stored in `localStorage['rf-theme']` and applied via `document.documentElement.dataset.theme` — same key/values across all pages, so a choice made on one page carries over to the next (shared origin under `pourquoi.github.io/russian-flash/`). Default (no saved preference) is `cyberpunk`.
+`index.html` and every `<id>/flashcards.html` support 4 themes (Cyberpunk, Retro 80s, Classic, Terminal), all driven by CSS custom properties scoped under `:root[data-theme="..."]`. A single icon button (`#themeToggle`, in the `.topbar` next to the title) cycles through them on click — no dropdown. The choice is stored in `localStorage['rf-theme']` and applied via `document.documentElement.dataset.theme` — same key/values across all pages, so a choice made on one page carries over to the next (shared origin under `pourquoi.github.io/russian-flash/`). Default (no saved preference) is `retro`.
 
 The new-student template (`.claude/skills/notion-vocab/template-flashcards.html`) has the identical theme block + selector — keep it in sync if the theme system changes.
 

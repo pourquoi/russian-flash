@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Russian Flashcards</title>
-<script>document.documentElement.dataset.theme = localStorage.getItem('rf-theme') || 'cyberpunk';</script>
+<script>document.documentElement.dataset.theme = localStorage.getItem('rf-theme') || 'retro';</script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;900&family=Share+Tech+Mono&family=Audiowide&family=VT323&display=swap');
 
@@ -152,7 +152,14 @@
     justify-content: center;
   }
 
-  .topbar { }
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 540px;
+    margin: 0 auto 20px;
+  }
 
   h1 {
     font-family: var(--font-display);
@@ -162,7 +169,6 @@
     text-shadow: var(--glow-1);
     letter-spacing: .18em;
     text-transform: uppercase;
-    margin-bottom: 20px;
   }
 
   /* Controls */
@@ -191,14 +197,6 @@
   }
   select:hover, button.ctrl:hover { border-color: var(--accent); background: var(--surface2); box-shadow: var(--glow-1); }
   select { flex: 1; min-width: 160px; }
-  #themeSelect {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    z-index: 10;
-    flex: 0 0 auto;
-    min-width: 150px;
-  }
 
   /* Progress */
   .progress-row {
@@ -327,6 +325,7 @@
 
   .btn-skip {
     width: 48px; height: 48px;
+    flex-shrink: 0;
     border-radius: 50%;
     border: 1px solid var(--border);
     background: var(--surface);
@@ -466,16 +465,6 @@
     .layout { flex-direction: column; align-items: center; }
     .sidebar { flex-direction: row; position: static; flex: none; width: 100%; max-width: 540px; max-height: none; }
     .slist { flex: 1; max-height: 160px; }
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      max-width: 540px;
-      margin: 0 auto 20px;
-    }
-    h1 { margin-bottom: 0; }
-    #themeSelect { position: static; top: auto; right: auto; z-index: auto; min-width: 0; }
   }
 
   /* Type mode */
@@ -543,12 +532,7 @@
 
 <div class="topbar">
   <h1>Russian Flashcards</h1>
-  <select id="themeSelect">
-    <option value="cyberpunk">🌆 Cyberpunk</option>
-    <option value="retro">🌴 Retro 80s</option>
-    <option value="classic">🟣 Classic</option>
-    <option value="terminal">💻 Terminal</option>
-  </select>
+  <button class="btn-skip" id="themeToggle" title="Cycle theme"></button>
 </div>
 
 <div class="layout">
@@ -863,30 +847,26 @@ typeInput.addEventListener('keydown', e => {
 });
 
 // Theme selector
-const themeSelect = document.getElementById('themeSelect');
-themeSelect.value = document.documentElement.dataset.theme;
-themeSelect.addEventListener('change', () => {
-  localStorage.setItem('rf-theme', themeSelect.value);
-  document.documentElement.dataset.theme = themeSelect.value;
-});
-
-// Icon-only labels on mobile (no room for text next to the title), full labels on desktop
-const THEME_LABELS = {
-  cyberpunk: ['🌆', '🌆 Cyberpunk'],
-  retro: ['🌴', '🌴 Retro 80s'],
-  classic: ['🟣', '🟣 Classic'],
-  terminal: ['💻', '💻 Terminal'],
+const THEMES = ['cyberpunk', 'retro', 'classic', 'terminal'];
+const THEME_META = {
+  cyberpunk: { icon: '🌆', name: 'Cyberpunk' },
+  retro:     { icon: '🌴', name: 'Retro 80s' },
+  classic:   { icon: '🟣', name: 'Classic' },
+  terminal:  { icon: '💻', name: 'Terminal' },
 };
-const mobileThemeQuery = window.matchMedia('(max-width: 700px)');
-function updateThemeLabels() {
-  const isMobile = mobileThemeQuery.matches;
-  for (const opt of themeSelect.options) {
-    const pair = THEME_LABELS[opt.value];
-    if (pair) opt.textContent = isMobile ? pair[0] : pair[1];
-  }
+const themeToggle = document.getElementById('themeToggle');
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  const meta = THEME_META[t];
+  themeToggle.textContent = meta.icon;
+  themeToggle.title = `Theme: ${meta.name} (click to change)`;
 }
-updateThemeLabels();
-mobileThemeQuery.addEventListener('change', updateThemeLabels);
+applyTheme(document.documentElement.dataset.theme);
+themeToggle.addEventListener('click', () => {
+  const next = THEMES[(THEMES.indexOf(document.documentElement.dataset.theme) + 1) % THEMES.length];
+  localStorage.setItem('rf-theme', next);
+  applyTheme(next);
+});
 
 // Events
 scene.addEventListener('click', () => { if (deck.length && inputMode !== 'type') flipCard(); });
