@@ -7,6 +7,8 @@ Extract vocabulary from a Notion page whose lessons link to Miro boards, for one
 
 Each student has their own Notion page, own vocab file, and own flashcards site under `<id>/`. The roster lives in `students.json` at the repo root.
 
+**Anonymity:** students are identified only by opaque codenames — `students.json` is public (committed) and holds no real names, only `{id, notionUrl}`. Real name ↔ codename mapping lives in `students.local.json` (gitignored, never committed). `index.html` does not list students — each gets their own unlisted link from the teacher directly.
+
 ## When to Use
 
 - User says "pull vocab", "get vocab from notion", "new lesson", "add vocab"
@@ -17,24 +19,30 @@ Each student has their own Notion page, own vocab file, and own flashcards site 
 
 ### Step 0: Identify the student
 
-Read `students.json`:
+Read `students.json` (public, no real names) and `students.local.json` (gitignored, real-name lookup):
 
 ```json
+// students.json
 [
-  { "id": "ad3b65", "name": "Codename", "notionUrl": "https://app.notion.com/p/..." }
+  { "id": "ad3b65", "notionUrl": "https://app.notion.com/p/..." }
+]
+// students.local.json (gitignored)
+[
+  { "id": "ad3b65", "realName": "Jane Doe" }
 ]
 ```
 
-- If the user named a student, match by `name` or `id`.
-- If ambiguous or unspecified, list the students and ask which one.
+- If the user named a student, match by `realName` in `students.local.json` (falling back to `id` if `students.local.json` doesn't exist yet or the id is given directly).
+- If ambiguous or unspecified, list students from `students.local.json` by real name and ask which one.
 - If the student isn't in the roster ("new student"):
   1. Ask for their name and Notion page URL.
-  2. Derive `id` as a lowercase-kebab slug of the name (e.g. "Jane Doe" → `jane-doe`).
-  3. Append `{ id, name, notionUrl }` to `students.json`.
-  4. Create `<id>/`:
-     - `russian-vocabulary.md` with a single `# <Name> — Russian Vocabulary` heading.
+  2. Generate an opaque `id` — random lowercase alphanumeric, e.g. `openssl rand -hex 3` — never derived from the name.
+  3. Append `{ id, notionUrl }` (no name) to `students.json`.
+  4. Append `{ id, realName }` to `students.local.json` (create it, gitignored, if missing).
+  5. Create `<id>/`:
+     - `russian-vocabulary.md` with a single `# Russian Vocabulary` heading (no name in it).
      - `flashcards.html` copied from `.claude/skills/notion-vocab/template-flashcards.html` (blank VOCAB/LESSON_NAMES/lesson dropdown).
-  5. Add a link for the student in root `index.html` if it isn't already driven dynamically from `students.json` (currently `index.html` fetches `students.json` at runtime, so no edit needed there).
+  6. `index.html` does not list students — nothing to update there. Share the new `<id>/flashcards.html` link with the student directly.
 
 All following steps operate on the resolved student's `notionUrl` and `<id>/` files.
 
@@ -132,12 +140,12 @@ Update `<id>/flashcards.html` in **three places** (all must stay in sync):
 If the user wants the update live, commit and push — GitHub Pages rebuilds automatically from the pushed branch:
 
 ```
-git add students.json <id>/ index.html
-git commit -m "Add <student>'s lesson N vocab"
+git add students.json <id>/
+git commit -m "Add lesson N vocab"
 git push
 ```
 
-Confirm with the user before pushing.
+Never commit `students.local.json` — it's gitignored and must stay off the public repo. Never put a real name in a commit message. Confirm with the user before pushing.
 
 ## Notes
 
@@ -147,3 +155,4 @@ Confirm with the user before pushing.
 - Notion uses `<a class="notion-link-token ...">` for Miro links — `querySelectorAll('a[href]')` works
 - Miro REST API v1 returns 401 for unauthenticated requests; accessibility trick is the only reliable path
 - Never hardcode a Notion URL in this skill — always resolve it from `students.json` per student
+- The student's Notion page URL slug may itself contain their real name (Notion derives it from the page title) — flag this to the teacher so they can rename the Notion page to strip it out

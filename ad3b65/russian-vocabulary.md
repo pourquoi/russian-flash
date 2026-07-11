@@ -1,6 +1,4 @@
-# Russian Vocabulary — Codename's Lessons
-
-Source: https://app.notion.com/p/Codename-3591aec3849980e9bdabc6f8592b9fc4
+# Russian Vocabulary
 
 ---
 
