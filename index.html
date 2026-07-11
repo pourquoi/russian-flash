@@ -122,7 +122,9 @@
   #themeSelect:hover { border-color: var(--accent); box-shadow: var(--glow-1); }
 
   @media (max-width: 700px) {
-    #themeSelect { position: static; top: auto; right: auto; z-index: auto; display: block; margin-bottom: 1.5rem; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    h1 { margin-bottom: 0; }
+    #themeSelect { position: static; top: auto; right: auto; z-index: auto; min-width: 0; }
   }
 
   ul { list-style: none; padding: 0; }
@@ -148,13 +150,15 @@
 </style>
 </head>
 <body>
-<h1>Russian Flashcards</h1>
-<select id="themeSelect">
-  <option value="cyberpunk">🌆 Cyberpunk</option>
-  <option value="retro">🌴 Retro 80s</option>
-  <option value="classic">🟣 Classic</option>
-  <option value="terminal">💻 Terminal</option>
-</select>
+<div class="topbar">
+  <h1>Russian Flashcards</h1>
+  <select id="themeSelect">
+    <option value="cyberpunk">🌆</option>
+    <option value="retro">🌴</option>
+    <option value="classic">🟣</option>
+    <option value="terminal">💻</option>
+  </select>
+</div>
 <ul id="list"></ul>
 <script>
 const themeSelect = document.getElementById('themeSelect');
