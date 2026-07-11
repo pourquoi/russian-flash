@@ -544,10 +544,10 @@
 <div class="topbar">
   <h1>Russian Flashcards</h1>
   <select id="themeSelect">
-    <option value="cyberpunk">🌆</option>
-    <option value="retro">🌴</option>
-    <option value="classic">🟣</option>
-    <option value="terminal">💻</option>
+    <option value="cyberpunk">🌆 Cyberpunk</option>
+    <option value="retro">🌴 Retro 80s</option>
+    <option value="classic">🟣 Classic</option>
+    <option value="terminal">💻 Terminal</option>
   </select>
 </div>
 
@@ -869,6 +869,24 @@ themeSelect.addEventListener('change', () => {
   localStorage.setItem('rf-theme', themeSelect.value);
   document.documentElement.dataset.theme = themeSelect.value;
 });
+
+// Icon-only labels on mobile (no room for text next to the title), full labels on desktop
+const THEME_LABELS = {
+  cyberpunk: ['🌆', '🌆 Cyberpunk'],
+  retro: ['🌴', '🌴 Retro 80s'],
+  classic: ['🟣', '🟣 Classic'],
+  terminal: ['💻', '💻 Terminal'],
+};
+const mobileThemeQuery = window.matchMedia('(max-width: 700px)');
+function updateThemeLabels() {
+  const isMobile = mobileThemeQuery.matches;
+  for (const opt of themeSelect.options) {
+    const pair = THEME_LABELS[opt.value];
+    if (pair) opt.textContent = isMobile ? pair[0] : pair[1];
+  }
+}
+updateThemeLabels();
+mobileThemeQuery.addEventListener('change', updateThemeLabels);
 
 // Events
 scene.addEventListener('click', () => { if (deck.length && inputMode !== 'type') flipCard(); });
