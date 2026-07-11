@@ -5,7 +5,7 @@ description: Pull vocabulary from a Notion page that links to Miro boards, for a
 
 Extract vocabulary from a Notion page whose lessons link to Miro boards, for one of possibly several students.
 
-Each student has their own Notion page, own vocab file, and own flashcards site under `students/<id>/`. The roster lives in `students.json` at the repo root.
+Each student has their own Notion page, own vocab file, and own flashcards site under `<id>/`. The roster lives in `students.json` at the repo root.
 
 ## When to Use
 
@@ -31,12 +31,12 @@ Read `students.json`:
   1. Ask for their name and Notion page URL.
   2. Derive `id` as a lowercase-kebab slug of the name (e.g. "Jane Doe" → `jane-doe`).
   3. Append `{ id, name, notionUrl }` to `students.json`.
-  4. Create `students/<id>/`:
+  4. Create `<id>/`:
      - `russian-vocabulary.md` with a single `# <Name> — Russian Vocabulary` heading.
      - `flashcards.html` copied from `.claude/skills/notion-vocab/template-flashcards.html` (blank VOCAB/LESSON_NAMES/lesson dropdown).
   5. Add a link for the student in root `index.html` if it isn't already driven dynamically from `students.json` (currently `index.html` fetches `students.json` at runtime, so no edit needed there).
 
-All following steps operate on the resolved student's `notionUrl` and `students/<id>/` files.
+All following steps operate on the resolved student's `notionUrl` and `<id>/` files.
 
 ### Step 1: Scrape Notion page and show available Miro links
 
@@ -112,7 +112,7 @@ From the raw text:
 
 ### Step 4: Output — update the student's files
 
-Append to `students/<id>/russian-vocabulary.md`:
+Append to `<id>/russian-vocabulary.md`:
 
 ```markdown
 ## Lesson name
@@ -122,7 +122,7 @@ Append to `students/<id>/russian-vocabulary.md`:
 | Привет! | Hi! |
 ```
 
-Update `students/<id>/flashcards.html` in **three places** (all must stay in sync):
+Update `<id>/flashcards.html` in **three places** (all must stay in sync):
 1. `VOCAB` array — append `{ru:"...",en:"...",l:N}` entries for the new lesson.
 2. `LESSON_NAMES` map — add `N:"Урок N — Topic"`.
 3. `<select id="lessonFilter">` — add `<option value="N">Урок N — Topic</option>`.
@@ -132,7 +132,7 @@ Update `students/<id>/flashcards.html` in **three places** (all must stay in syn
 If the user wants the update live, commit and push — GitHub Pages rebuilds automatically from the pushed branch:
 
 ```
-git add students.json students/<id>/ index.html
+git add students.json <id>/ index.html
 git commit -m "Add <student>'s lesson N vocab"
 git push
 ```
