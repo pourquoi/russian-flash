@@ -117,6 +117,7 @@ From the raw text:
 - Flip card pattern: `Word\nFlip` — word is on the line before "Flip"
 - Table rows, numbered lists with word pairs
 - Strip Miro UI noise: "Skip to...", "Accessibility controls", "Sign up for free", percentages, image filenames (UUID.png)
+- Mark stress: add a combining acute accent (U+0301) right after the stressed vowel in every Russian word/phrase of 2+ syllables (e.g. Спаси́бо). Skip monosyllabic words and any syllable with ё (always stressed, never marked). Apply consistently in both `russian-vocabulary.md` and the `ru` fields of `VOCAB`/`LESSON_NAMES`/`<select>` in `flashcards.html`.
 
 ### Step 4: Output — update the student's files
 
