@@ -308,3 +308,29 @@ Review lesson mixing flip-card review with a reading passage and dialogues.
 | Дождь / Идёт дождь | Rain / It's raining |
 | Снег / Идёт снег | Snow / It's snowing |
 | Ве́тер | Wind |
+
+---
+
+## Уро́к 10: Практи́ческий уро́к 2 (Practical Lesson 2 — speaking review)
+
+Second review/speaking-practice lesson: warm-up questions, a topic wheel, and picture-description prompts. Most slides are picture-based flip cards (image files) whose content can't be read from the accessibility outline — only the text portions below were extractable.
+
+**New vocab:**
+
+| Russian | English |
+|---|---|
+| Разми́нка | Warm-up |
+| Сего́дня | Today |
+| Гра́дус / Гра́дусы | Degree / Degrees |
+| Вре́мя го́да / Времена́ го́да | Season / Seasons |
+| Друг | Friend |
+| Го́род | City |
+| И́мя | Name (noun) |
+| Люби́мый / Люби́мая | Favorite (m/f) |
+| Чи́сла | Numbers |
+
+**Warm-up questions:** Кака́я пого́да сего́дня? Ско́лько гра́дусов? Како́е вре́мя го́да сейча́с? Како́го цве́та ва́ши глаза́? Како́й ваш го́род? Кем рабо́тает ваш друг?
+
+**Topic wheel (spin and talk about):** Во́зраст · Семья́ · Рабо́та · Профе́ссия · У меня́ есть... · Пого́да · Времена́ го́да · Вне́шность · Цвета́ · Чи́сла (0–10, 10–20, 20–100)
+
+**Talk about yourself — prompts:** Ва́ше и́мя. Во́зраст. Отку́да вы? Ва́ша профе́ссия. Ва́ша рабо́та. Что вы у́чите? Кака́я у вас вне́шность? Кака́я пого́да ва́ша люби́мая? Како́е ва́ше люби́мое вре́мя го́да?
